@@ -1,0 +1,112 @@
+// ==UserScript==
+// @name         Export PDF and RIS
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Doawload PDF and Ris file in one single click for the Science Journal!
+// @author       NiJi Z & ChatGPT
+// @match        https://www.science.org/doi/*/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Function to initiate form submission
+    function submitForm() {
+        var citationFormat = 'ris'; // Replace 'ris' with your desired format ('endnote', 'bibtex', 'medlars', or 'refworks')
+
+        // Find the select element and set the value to the desired format
+        var selectElement = document.querySelector('#slct_format');
+        if (selectElement) {
+            selectElement.value = citationFormat;
+        } else {
+            console.error('Select element not found.');
+            return;
+        }
+
+        // Trigger a click event on the "EXPORT CITATION" button
+        var button = document.querySelector('input[name="submit"][value="EXPORT CITATION"]');
+        if (button) {
+            button.click();
+        } else {
+            console.error('Button not found.');
+        }
+    }
+
+     // Function to modify the PDF link and access it
+    function modifyPDFLink() {
+        // Find the specific element with class "info-panel__formats" and "info-panel__item"
+        const infoPanelElement = document.querySelector('.info-panel__formats.info-panel__item');
+
+        // Check if the element exists and has a valid href attribute
+        if (infoPanelElement && infoPanelElement.firstChild && infoPanelElement.firstChild.href) {
+            // Extract the DOI number from the href attribute
+            const doiNumber = infoPanelElement.firstChild.href.match(/\/doi\/reader\/(.*?)$/)[1];
+
+            // Create the target href with the updated download parameter
+            const targetHref = `/doi/pdf/${doiNumber}?download=true`;
+
+            // Modify the existing link to point to the target href
+            infoPanelElement.firstChild.href = targetHref;
+
+            // Optionally, you can simulate a click on the link to automatically initiate the download
+            infoPanelElement.firstChild.click();
+        }
+    }
+
+    // Function to generate a random wait time between min and max (inclusive)
+    function getRandomWaitTime(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Function to execute the main functionality after a random wait time
+    function executeAfterRandomWait() {
+        const randomWaitTime = getRandomWaitTime(50, 100);
+        console.log(`Waiting for ${randomWaitTime} milliseconds...`);
+        setTimeout(function() {
+            // Put your main functionality here
+            console.log("Executing after random wait!");
+
+            // Call the function you want to run after the wait
+            // For example, modifyPDFLink() from the previous example:
+            // modifyPDFLink();
+        }, randomWaitTime);
+    }
+
+    // Create a button element and set its properties
+    var button = document.createElement("button");
+button.textContent = "Download PDF&Ris!";
+button.style.position = "fixed";
+button.style.bottom = "20px";
+button.style.right = "20px";
+button.style.zIndex = "9999";
+button.style.padding = "10px 20px";
+button.style.border = "none";
+button.style.borderRadius = "5px";
+button.style.backgroundColor = "#3498db";
+button.style.color = "#fff";
+button.style.fontSize = "16px";
+button.style.cursor = "pointer";
+button.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.2)";
+
+// Optionally, you can add hover and focus effects to make it more interactive
+button.addEventListener("mouseenter", function() {
+  button.style.backgroundColor = "#2980b9";
+});
+
+button.addEventListener("mouseleave", function() {
+  button.style.backgroundColor = "#3498db";
+});
+
+// Add the button to the document
+document.body.appendChild(button);
+
+    // Attach a click event listener to the button
+    button.addEventListener("click", function() {
+        submitForm();
+        console.log("clicked");
+        // Call the function to execute after a random wait
+        executeAfterRandomWait();
+        modifyPDFLink();
+    });
+})();
